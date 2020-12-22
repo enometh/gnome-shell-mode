@@ -325,6 +325,10 @@ If error:
   (interactive "p")
   (gnome-shell-send-region (point-min) (point-max) nil interactively))
 
+(defun gnome-shell-send-line (&optional interactively)
+  "Send send the line content to gnome-shell, using the dbus Eval method."
+  (interactive "p")
+  (gnome-shell-send-region (line-beginning-position) (line-end-position) nil interactively))
 
 (defun gnome-shell-cmd (cmd &optional insert-result interactively)
   "Send a expression to gnome-shell."

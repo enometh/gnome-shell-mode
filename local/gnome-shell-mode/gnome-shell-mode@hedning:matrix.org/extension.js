@@ -10,6 +10,7 @@ const Gio = imports.gi.Gio;
 const GObject = imports.gi.GObject;
 
 function init() {
+    global.context.unsafe_mode = true;
     print('init gnome-shell-mode server')
     window.emacs = {};
 

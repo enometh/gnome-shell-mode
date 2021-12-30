@@ -6,6 +6,9 @@ TYPE=${1:-$XDG_SESSION_TYPE}; shift
 ROOT=$1; shift
 UUID=$1; shift
 
+GNOME_SHELL_MODE_UUID=gnome-shell-mode@hedning:matrix.org
+GNOME_SHELL_MODE_PARENT_DIR=${HOME}/.local/share/gnome-shell/extensions
+
 d=0
 while [ -e /tmp/.X11-unix/X${d} ]; do
     d=$((d + 1))
@@ -20,6 +23,7 @@ export XDG_CONFIG_HOME=${CACHE}/config
 export XDG_DATA_HOME=${CACHE}/local
 mkdir -p $XDG_DATA_HOME/gnome-shell/extensions
 ln -fsn $ROOT $XDG_DATA_HOME/gnome-shell/extensions/${UUID}
+ln -fsn ${GNOME_SHELL_MODE_PARENT_DIR}/${GNOME_SHELL_MODE_UUID} $XDG_DATA_HOME/gnome-shell/extensions/${GNOME_SHELL_MODE_UUID}
 export XDG_CACHE_HOME=${CACHE}/cache
 
 DISPLAY=$NEW_DISPLAY
@@ -40,7 +44,8 @@ case "$TYPE" in
 esac
 
 # dconf reset -f /  # Reset settings
-dconf write /org/gnome/shell/enabled-extensions "['${UUID}']"
+dconf write /org/gnome/shell/enabled-extensions "['${UUID}', '${GNOME_SHELL_MODE_UUID}']"
+dconf write /org/gnome/shell/disable-extension-version-validation true
 
 # export CLUTTER_SHOW_FPS=1
 export SHELL_DEBUG=all

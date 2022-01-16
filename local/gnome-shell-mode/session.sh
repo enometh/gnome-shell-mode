@@ -30,6 +30,14 @@ DISPLAY=$NEW_DISPLAY
 eval $(dbus-launch --exit-with-session --sh-syntax)
 echo $DBUS_SESSION_BUS_ADDRESS
 
+# #tabbed -s -n Xephyr > /dev/shm/xephyr.xid &
+XEMBED=$(cat /dev/shm/xephyr.xid)
+
+if [ -n $"XEMBED" ]; then
+    XEMBED_ARGS="-parent $XEMBED"
+fi
+
+
 DISPLAY=$OLD_DISPLAY
 args=()
 case "$TYPE" in
@@ -37,7 +45,12 @@ case "$TYPE" in
         args=(--nested --wayland)
         ;;
     x11)
-        Xephyr $NEW_DISPLAY &
+	if [ -n "${XEMBED}" ] && xwininfo -id "${XEMBED}" | grep Xephyr ; then
+	    :
+	else
+	    Xephyr $NEW_DISPLAY $XEMBED_ARGS &
+	    sleep 4
+	fi
         DISPLAY=$NEW_DISPLAY
         args=--x11
         ;;

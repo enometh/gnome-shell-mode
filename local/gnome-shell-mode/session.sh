@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -x
+
 OLD_DISPLAY=$DISPLAY
 
 TYPE=${1:-$XDG_SESSION_TYPE}; shift
@@ -49,6 +51,8 @@ case "$TYPE" in
 	    :
 	else
 	    Xephyr $NEW_DISPLAY $XEMBED_ARGS &
+#	    echo "---> " Xephyr $NEW_DISPLAY $XEMBED_ARGS -screen 1024x768
+#	    Xephyr $NEW_DISPLAY $XEMBED_ARGS -screen 1024x768 &
 	    sleep 4
 	fi
         DISPLAY=$NEW_DISPLAY
@@ -58,6 +62,7 @@ esac
 
 # dconf reset -f /  # Reset settings
 dconf write /org/gnome/shell/enabled-extensions "['${UUID}', '${GNOME_SHELL_MODE_UUID}']"
+#gsettings set org.gnome.shell disable-extension-version-validation true
 dconf write /org/gnome/shell/disable-extension-version-validation true
 
 # export CLUTTER_SHOW_FPS=1

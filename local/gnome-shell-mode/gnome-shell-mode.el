@@ -430,9 +430,9 @@ running"
                (insert string))
              (when scroll
                (goto-char (point-max)))))
-         (when (string-match "unix:abstract" string)
-           (setq string (substring string 0 (string-match "\n" string)))
-           (gnome-shell-set-dbus-address string))
+         (when (string-match "^\\(unix:abstract.*\\)$" string)
+	   (let ((string-debug (match-string 1 string)))
+	     (gnome-shell-set-dbus-address string-debug)))
          (when (string-match "JS ERROR: " string)
            (gnome-shell--flycheck-log process string))))))
 

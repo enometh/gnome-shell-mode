@@ -404,7 +404,7 @@ running"
         (with-current-buffer buffer
           (flycheck-teardown))))
     (setq gnome-shell--errors nil)
-    (gnome-shell-set-dbus-address :session)
+    (gnome-shell-set-dbus-address ":session")
     (let* ((name "gnome-session")
           (bus-address nil)
           (buffer (create-file-buffer " *gnome-session*"))

@@ -513,17 +513,31 @@ running"
                     )
                     ))
 
-(define-derived-mode gnome-shell-mode js2-mode "gnome-shell"
+
+;; ;madhu 220508 if -*- mode: js2-mode -*- is specified in the file,
+;; we end up not using gnome-shell-mode but js2-mode. gnome-shell-mode
+;; should be a minor mode and not a derived mode of js2-mode
+
+(define-minor-mode gnome-shell-mode
   "gnome-shell-mode provides tight integration of emacs and gnome-shell.
+
+It is a minor mode on top of js2-mode rather than a derived mode only because
+many files add a mode: js2 file variable in their comments.
 "
-  (use-local-map gnome-shell-mode-map)
+  :global nil
+  :lighter "[gsm]"
+  :keymap gnome-shell-mode-map
 
-  (add-hook
-   'flycheck-mode-hook
-   #'gnome-shell--add-all-errors)
+  (when gnome-shell-mode
+    (unless (eq major-mode 'js2-mode)
+      (js2-mode))
 
-  (add-hook 'gnome-shell-mode-hook
-            #'flycheck-mode))
+    (add-hook
+     'flycheck-mode-hook
+     #'gnome-shell--add-all-errors)
+
+    (add-hook 'gnome-shell-mode-hook
+              #'flycheck-mode)))
 
 (provide 'gnome-shell-mode)
 

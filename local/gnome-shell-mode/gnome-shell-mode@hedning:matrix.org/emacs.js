@@ -568,7 +568,8 @@ function Restart(path) {
         return;
     extensionImports.extension.disable();
     imports.gi.Meta.restart(
-        `Restarting (disabled ${extensionImports.__moduleName__} first)`);
+        `Restarting (disabled ${extensionImports.__moduleName__} first)`,
+    global.context);
 }
 
 function findModule(path) {

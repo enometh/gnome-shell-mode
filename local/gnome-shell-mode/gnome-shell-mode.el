@@ -518,6 +518,17 @@ running"
 ;; we end up not using gnome-shell-mode but js2-mode. gnome-shell-mode
 ;; should be a minor mode and not a derived mode of js2-mode
 
+
+(defvar gnome-shell-mode-re-enable-hack nil
+  "Should be global. Should not be a local variable")
+
+
+(defun gnome-shell-mode-re-enable-hack ()
+  (when gnome-shell-mode-re-enable-hack
+    (cond (gnome-shell-mode (warn "SANITY"))
+	  (t (gnome-shell-mode 1)))))
+
+
 (define-minor-mode gnome-shell-mode
   "gnome-shell-mode provides tight integration of emacs and gnome-shell.
 
@@ -529,15 +540,20 @@ many files add a mode: js2 file variable in their comments.
   :keymap gnome-shell-mode-map
 
   (when gnome-shell-mode
-    (unless (eq major-mode 'js2-mode)
-      (js2-mode))
-
     (add-hook
      'flycheck-mode-hook
      #'gnome-shell--add-all-errors)
 
     (add-hook 'gnome-shell-mode-hook
-              #'flycheck-mode)))
+              #'flycheck-mode)
+
+    (add-hook 'js2-mode-hook
+	      #'gnome-shell-mode-re-enable-hack)
+
+    (unless (eq major-mode 'js2-mode)
+      (let ((gnome-shell-mode-re-enable-hack t))
+	(js2-mode)))))
+
 
 (provide 'gnome-shell-mode)
 

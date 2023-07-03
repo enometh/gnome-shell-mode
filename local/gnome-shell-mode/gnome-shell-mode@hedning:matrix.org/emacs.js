@@ -468,7 +468,7 @@ function mapLine(sourceMap, line) {
     return sourceMap[i].source + (line - sourceMap[i].sink);
 }
 
-let fileScopes = {};
+var fileScopes = {};
 function findScope(path) {
     let scope;
     try {

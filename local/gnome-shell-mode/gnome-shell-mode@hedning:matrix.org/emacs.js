@@ -549,13 +549,28 @@ function Reload(code, path) {
         return [false, 'Not in a valid extension'];
     }
 
+    let uuid = extensionImports.extension.uuid;
+
     // Disable the extension
-    extensionImports.extension.disable();
+    if (extensionImports.extension.disable == undefined) {
+	imports.ui.main.extensionManager.enableExtension(uuid);
+	verboseLog(`Disabling extension ${uuid} via extensionManager.`);
+    } else {
+	verboseLog(`Disabling extension ${uuid}.`);
+	extensionImports.extension.disable();
+    }
 
     // Reload the code
     const [evalSuccess, result] = Eval(code, path);
     // Enable the extension again
-    extensionImports.extension.enable();
+
+    if (extensionImports.extension.disable == undefined) {
+	verboseLog(`Enabling extension ${uuid} via extensionManager.`);
+	imports.ui.main.extensionManager.enableExtension(uuid);
+    } else {
+	verboseLog(`Enabling extension ${uuid}.`);
+	extensionImports.extension.enable();
+    }
     return [evalSuccess, result];
 }
 

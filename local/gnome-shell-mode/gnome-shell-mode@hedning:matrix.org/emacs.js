@@ -3,10 +3,14 @@
 const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
 const GObject = imports.gi.GObject;
-const JsParse = imports.misc.jsParse;
+import * as JsParse from 'resource:///org/gnome/shell/ui/main.js';
 const ByteArray = imports.byteArray;
 
 let verbose = false;
+
+export {Eval, Reload, completionCandidates, Restart};
+import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
+import {extensionManager} from 'resource:///org/gnome/shell/ui/main.js';
 
 function verboseLog() {
     if (verbose) {
@@ -545,34 +549,24 @@ function Eval(code, path) {
  */
 function Reload(code, path) {
     // Make sure that we're in an ext
-    let [type, extensionImports, root] = findExtensionImports(path);
-
+    let [type, root] = findExtensionRoot(path);
     if (type !== 'extension') {
         return [false, 'Not in a valid extension'];
     }
-
-    let uuid = extensionImports.extension.uuid;
+    let [extension, uuid] = findExtension(root);
+    if (! extension) {
+        return [false, 'Not in a valid extension'];
+    }
 
     // Disable the extension
-    if (extensionImports.extension.disable == undefined) {
-	imports.ui.main.extensionManager.enableExtension(uuid);
-	verboseLog(`Disabling extension ${uuid} via extensionManager.`);
-    } else {
-	verboseLog(`Disabling extension ${uuid}.`);
-	extensionImports.extension.disable();
-    }
+    extension.disable()
 
     // Reload the code
     const [evalSuccess, result] = Eval(code, path);
-    // Enable the extension again
 
-    if (extensionImports.extension.enable == undefined) {
-	verboseLog(`Enabling extension ${uuid} via extensionManager.`);
-	imports.ui.main.extensionManager.enableExtension(uuid);
-    } else {
-	verboseLog(`Enabling extension ${uuid}.`);
-	extensionImports.extension.enable();
-    }
+    // Enable the extension again
+    extension.enable();
+
     return [evalSuccess, result];
 }
 
@@ -580,57 +574,35 @@ function Reload(code, path) {
    Run extension.disable and then restart Gnome Shell
  */
 function Restart(path) {
-    let [type, extensionImports, _] = findExtensionImports(path);
+    let [type, root] = findExtensionRoot(path);
     if (type !== 'extension')
         return;
 
-    if (extensionImports.extension.disable == undefined) {
-	imports.ui.main.extensionManager.enableExtension(uuid);
+    let [extension, uuid] = findExtension(root);
+
+    if (extension.disable == undefined) {
+	extensionManager.enableExtension(uuid);
 	verboseLog(`Disabling extension ${uuid} via extensionManager.`);
     } else {
 	verboseLog(`Disabling extension ${uuid}.`);
-	extensionImports.extension.disable();
+	extension.disable();
     }
 
     imports.gi.Meta.restart(
-        `Restarting (disabled ${extensionImports.__moduleName__} first)`,
+        `Restarting (disabled ${$root} first)`,
     global.context);
 }
 
+// returns an ESM module
 function findModule(path) {
-    let [type, extensionImports, projectRoot] = findExtensionImports(path);
-
-    // (projectRoot does not end with slash)
-    let relPath = path.slice(projectRoot.length+1);
-
-    // Find the module object we're in
-    if (relPath.endsWith('.js')) {
-        relPath = relPath.substring(0, relPath.length - 3);
-        return relPath.split('/').reduce((module, name) => {
-            if (module[name]) {
-                return module[name];
-            }
-            return empty;
-        },  extensionImports);
-    } else {
-        return null;
-    }
-}
-
-function findExtensionImports(path) {
-    let [type, projectRoot] = findExtensionRoot(path);
-    if (projectRoot === null || type === null) {
-        return [null, null, null];
-    }
-
-    if (type === 'extension') {
-        let extension = findExtension(projectRoot);
-        if (extension) {
-            return [type, extension.imports, projectRoot];
-        }
-    } else if (type === 'shell') {
-        return [type, imports, projectRoot];
-    }
+    let loop = GLib.MainLoop.new(null, false);
+    let ret;
+    if (path.startsWith("/")) path = "file://" + path;
+    import(path)
+	.then(obj => { ret = obj; loop.quit(); })
+	.catch(err => { let {stack}=err; log(`loading error\n ${err.name}\n ${err} ${stack}`); });
+    loop.run();
+    return ret;
 }
 
 function findExtensionUUID(projectRoot) {
@@ -642,14 +614,10 @@ function findExtensionUUID(projectRoot) {
 }
 
 function findExtension(projectRoot) {
-        let uuid = findExtensionUUID(projectRoot);
-        if (uuid === undefined)
-            return [null, null];
-        if (imports.misc.extensionUtils.extensions) {
-            return [imports.misc.extensionUtils.extensions[uuid], uuid]
-        } else {
-            return [imports.ui.main.extensionManager.lookup(uuid), uuid];
-        }
+    let uuid = findExtensionUUID(projectRoot);
+    if (uuid == undefined)
+	return [null, null];
+    return [Extension.lookupByUUID(uuid), uuid];
 }
 
 function getGlobalCompletionsAndKeywords() {

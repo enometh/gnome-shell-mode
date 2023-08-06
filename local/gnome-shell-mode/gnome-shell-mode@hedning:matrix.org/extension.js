@@ -1,11 +1,6 @@
 const uuid = "gnome-shell-mode@hedning:matrix.org";
-var Extension;
-if (imports.misc.extensionUtils.extensions) {
-    Extension = imports.misc.extensionUtils.extensions[uuid];
-} else {
-    Extension = imports.ui.main.extensionManager.lookup(uuid);
-}
-const Emacs = Extension.imports.emacs;
+
+import * as Emacs from './emacs.js'
 const Gio = imports.gi.Gio;
 const GObject = imports.gi.GObject;
 
@@ -80,4 +75,13 @@ function enable() {
 function disable() {
     print('disable gnome-shell-mode server');
     dbusImpl.unexport();
+}
+
+//;madhu 230806 gnome-shell 45.alpha
+export default class Extension {
+    constructor() {
+	init();
+    }
+    enable() { enable(); }
+    disable() { disable(); }
 }

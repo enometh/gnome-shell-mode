@@ -564,7 +564,7 @@ function Reload(code, path) {
     const [evalSuccess, result] = Eval(code, path);
     // Enable the extension again
 
-    if (extensionImports.extension.disable == undefined) {
+    if (extensionImports.extension.enable == undefined) {
 	verboseLog(`Enabling extension ${uuid} via extensionManager.`);
 	imports.ui.main.extensionManager.enableExtension(uuid);
     } else {
@@ -581,7 +581,15 @@ function Restart(path) {
     let [type, extensionImports, _] = findExtensionImports(path);
     if (type !== 'extension')
         return;
-    extensionImports.extension.disable();
+
+    if (extensionImports.extension.disable == undefined) {
+	imports.ui.main.extensionManager.enableExtension(uuid);
+	verboseLog(`Disabling extension ${uuid} via extensionManager.`);
+    } else {
+	verboseLog(`Disabling extension ${uuid}.`);
+	extensionImports.extension.disable();
+    }
+
     imports.gi.Meta.restart(
         `Restarting (disabled ${extensionImports.__moduleName__} first)`,
     global.context);

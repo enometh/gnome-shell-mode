@@ -559,7 +559,7 @@ function Reload(code, path) {
     }
 
     // Disable the extension
-    extension.disable()
+    extension.disable();
 
     // Reload the code
     const [evalSuccess, result] = Eval(code, path);
@@ -589,7 +589,7 @@ function Restart(path) {
     }
 
     imports.gi.Meta.restart(
-        `Restarting (disabled ${$root} first)`,
+        `Restarting (disabled ${root} first)`,
     global.context);
 }
 

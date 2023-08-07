@@ -644,11 +644,11 @@ function findExtensionUUID(projectRoot) {
 function findExtension(projectRoot) {
         let uuid = findExtensionUUID(projectRoot);
         if (uuid === undefined)
-            return false;
+            return [null, null];
         if (imports.misc.extensionUtils.extensions) {
-            return imports.misc.extensionUtils.extensions[uuid];
+            return [imports.misc.extensionUtils.extensions[uuid], uuid]
         } else {
-            return imports.ui.main.extensionManager.lookup(uuid);
+            return [imports.ui.main.extensionManager.lookup(uuid), uuid];
         }
 }
 

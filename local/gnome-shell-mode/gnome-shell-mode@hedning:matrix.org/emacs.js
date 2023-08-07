@@ -637,7 +637,7 @@ function findExtensionUUID(projectRoot) {
     let metadataFile = `${projectRoot}/metadata.json`;
     if (GLib.file_test(metadataFile, GLib.FileTest.IS_REGULAR)) {
         const [success, metadata] = GLib.file_get_contents(metadataFile);
-        return = JSON.parse(ByteArray.toString(metadata)).uuid;
+        return JSON.parse(ByteArray.toString(metadata)).uuid;
     }
 }
 

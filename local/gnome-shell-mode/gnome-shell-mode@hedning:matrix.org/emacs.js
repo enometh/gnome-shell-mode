@@ -36,6 +36,8 @@ prettyPrinters["Object"] = function(obj, key) {
     if (obj.toString !== Object.prototype.toString) {
         // The object have a custom toString method
         return obj.toString();
+    } else if (obj.toJSON == undefined) {
+	return "Unprintable Object";
     } else {
         // Let JSON handle it
         return  obj;

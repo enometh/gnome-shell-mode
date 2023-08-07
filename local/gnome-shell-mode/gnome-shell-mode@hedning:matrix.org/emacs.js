@@ -631,11 +631,16 @@ function findExtensionImports(path) {
     }
 }
 
-function findExtension(projectRoot) {
+function findExtensionUUID(projectRoot) {
     let metadataFile = `${projectRoot}/metadata.json`;
     if (GLib.file_test(metadataFile, GLib.FileTest.IS_REGULAR)) {
         const [success, metadata] = GLib.file_get_contents(metadataFile);
-        let uuid = JSON.parse(ByteArray.toString(metadata)).uuid;
+        return = JSON.parse(ByteArray.toString(metadata)).uuid;
+    }
+}
+
+function findExtension(projectRoot) {
+        let uuid = findExtensionUUID(projectRoot);
         if (uuid === undefined)
             return false;
         if (imports.misc.extensionUtils.extensions) {
@@ -643,7 +648,6 @@ function findExtension(projectRoot) {
         } else {
             return imports.ui.main.extensionManager.lookup(uuid);
         }
-    }
 }
 
 function getGlobalCompletionsAndKeywords() {

@@ -562,13 +562,19 @@ function Reload(code, path) {
     extension.disable();
 
     // Reload the code
-    const [evalSuccess, result] = Eval(code, path);
+    //const [evalSuccess, result] = Eval(code, path);
+    log(`;madhu 230807 Reload doesn't work on ESM. Trying to import the module ${root} again`);
+    let ret = findModule(path);
 
     // Enable the extension again
     extension.enable();
 
-    return [evalSuccess, result];
+    return [!!ret, JSON.stringify({"success":!!ret, "value":"BOGUS"})]
+    //return [evalSuccess, result];
 }
+
+
+
 
 /**
    Run extension.disable and then restart Gnome Shell
@@ -594,7 +600,7 @@ function Restart(path) {
 }
 
 // returns an ESM module
-function findModule(path) {
+function findModule(path, reload=true) {
     let loop = GLib.MainLoop.new(null, false);
     let ret;
     if (path.startsWith("/")) path = "file://" + path;
